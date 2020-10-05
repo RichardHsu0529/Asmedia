@@ -1,0 +1,54 @@
+¡@¡@Asmedia 28xx/18xx Linux GPIO Test
+¡@¡@
+GPIO Driver ¡V Building
+1. Install linux-tool-chain
+$ sudo apt-get install build-essential linux-headers-$(uname -r)
+
+2. Compile driver Package(including xxxx.c & Makefile)
+$make clean
+$make
+   =>generate file(xxx.ko)
+   
+User Space - Sysfs control GPIO Under Root Permission(Note 1)
+3. Install driver
+   $insmod xxx.ko
+   
+4. Check GPIO Chip folder, label and Pin-Number Base after driver installation
+$ cd /sys/class/gpio
+$ ls   => check gpiochipxxx folder in /sys/class/gpio/ directory
+$ more /sys/class/gpio/gpiochipxxx/label  => confirm label with ASMEDIA GPIO  
+$ ASMEDIA GPIO
+$ more /sys/class/gpio/gpiochipxxx/base  => confirm base of Pin number
+$ 0
+EX.
+   0 + 0(0)		=> GPIO0
+   0 +1 (1)		=> GPIO1
+	  0 +2 (2)		=> GPIO2
+   0 +3 (3)		=> GPIO3
+   0 +4 (4)		=> GPIO4
+	  0 +5 (5)		=> GPIO5
+   0 +6 (6)		=> GPIO6
+   0 +7 (7)		=> GPIO7
+5. GPIO1 Pin test example:
+* In Sysfs GPIO entries (/sys/class/gpio)
+Export the particular GPIO pin for user control. GPIO1 is taken as example.
+$ echo 1 > /sys/class/gpio/export
+Change the GPIO pin direction to in/out
+$ echo "out" > /sys/class/gpio/gpio1/direction
+or
+$ echo "in" > /sys/class/gpio/gpio1/direction
+Write the value to GPIO output pin
+$ echo 1 > /sys/class/gpio/gpio1/value
+or
+$ echo 0 > /sys/class/gpio/gpio1/value
+Read the value form GPIO input pin
+$ cat /sys/class/gpio/gpio1/value
+Unexport the GPIO pin
+$ echo 1 > /sys/class/gpio/unexport
+
+6. Un-install driver
+$rmmod xxx.ko
+
+Note 1: Enable GPIO sysfs support in kernel configuration and build the kernel
+Device Drivers  --- > GPIO Support  --- > /sys/class/gpio/... (sysfs interface)
+

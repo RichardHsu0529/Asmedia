@@ -1,0 +1,68 @@
+　　Asmedia 28xx/18xx Linux GPIO Test 
+　　
+1. Install linux-tool-chain
+$ sudo apt-get install build-essential linux-headers-$(uname -r)
+2. Compile driver (including xxxx.c & Makefile)
+$make clean
+$make
+   =>generate file(xxx.ko)
+3. install driver(under Root Permission)
+   $insmod xxx.ko
+4. 確認GPIO Controller file和 其Pin-number Base
+$ cd /sys/class/gpio
+$ ls  =>看在/sys/class/gpio/ 下是否有gpiochipxxx 資料夾
+$ more /sys/class/gpio/gpiochipxxx/label  => 確認是否為ASMEDIA GPIO 
+$ ASMEDIA GPIO
+$ more /sys/class/gpio/gpiochipxxx/base  => 確認Pin腳的起始編號
+$ 0
+EX.
+   0 + 0(0)		=> GPIO0
+   0 +1 (1)		=> GPIO1
+	  0 +2 (2)		=> GPIO2
+   0 +3 (3)		=> GPIO3
+   0 +4 (4)		=> GPIO4
+	  0 +5 (5)		=> GPIO5
+   0 +6 (6)		=> GPIO6
+   0 +7 (7)		=> GPIO7
+測試GPIO1 Pin Output:
+5. 建立一個檔案節點來控制單一GPIO Pin
+Ex. 建立GPIO1 file node
+$ echo 1 > /sys/class/gpio/export =>產生/sys/class/gpio/gpio1 file
+6. 設定GPIO1為output
+$ echo “out” > /sys/class/gpio/gpio1/direction
+7. 設定GPIO1 輸出為1,並用電表或LA量其電壓(也可用LED顯示燈號顏色)
+$ echo 1 > /sys/class/gpio/gpio1/value
+8. 設定GPIO1 輸出為0,並用電表或LA量其電壓(也可用LED顯示燈號顏色)
+$ echo 0 > /sys/class/gpio/gpio1/value
+9. 刪除一個GPIO Pin檔案節點
+$ echo 1 > /sys/class/gpio/unexport=>刪除/sys/class/gpio/gpio1 file
+
+測試GPIO2 Pin Input:  在沒接LED顯示燈號module下,我們使用GPIO1/2 兩根Pin對接的方式來測試,設GPIO1為output, GPIO2為input借由控制GPIO1的輸出來看GPIO2的結果
+
+10. 建立GPIO1/2 Pin檔案節點並設定方向
+$ echo 1 > /sys/class/gpio/export =>產生/sys/class/gpio/gpio1 file
+$ echo 2 > /sys/class/gpio/export =>產生/sys/class/gpio/gpio2 file
+$ echo “out” > /sys/class/gpio/gpio1/direction=>設GPIO1為output
+$ echo “in” > /sys/class/gpio/gpio2/direction設GPIO2為input
+11. 控制GPIO1為1 讀取GPIO2並確認是否為1
+$ echo 1 > /sys/class/gpio/gpio1/value=>設GPIO1為1
+$ cat /sys/class/gpio/gpio2/value=>讀取GPIO2
+$ 1 =>確認GPIO2是否為1     
+12. 控制GPIO1為0 讀取GPIO2並確認是否為0
+$ echo 0 > /sys/class/gpio/gpio1/value=>設GPIO1為0
+$ cat /sys/class/gpio/gpio2/value=>讀取GPIO2
+   $ 0 =>確認GPIO2是否為0    
+13. 刪除GPIO1/2 Pin檔案節點
+$ echo 1 > /sys/class/gpio/unexport
+$ echo 2 > /sys/class/gpio/unexport
+14. Uninstall driver
+$rmmod xxx.ko
+
+如接LED顯示燈號module的方式測試:直接由module控制輸出,GPIO Pin2設為input 並讀取就可
+Ex.
+	$ echo 2 > /sys/class/gpio/export =>產生/sys/class/gpio/gpio2 file
+	$ echo “in” > /sys/class/gpio/gpio2/direction設GPIO2為input
+	$ cat /sys/class/gpio/gpio2/value
+    $ ?  =>值由module的輸出決定
+	$ echo 2 > /sys/class/gpio/unexport
+
